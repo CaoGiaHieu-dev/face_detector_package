@@ -13,8 +13,7 @@ class FaceDetectorConfig {
         listDetectorType = (detectionDisplay == DetectionDisplay.DEFAULT)
             ? listDetectorType
             : listDetectorType.toList()
-          // ignore: unnecessary_statements
-          ..shuffle,
+          ..shuffle(),
         assert(
             listDetectorType
                 .where(
