@@ -30,12 +30,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Colors.amber,
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
         body: FaceDetectorView(
           config: config,
-          size: MediaQuery.of(context).size.width * 2 / 3,
+          size: 300,
         ),
       ),
     );

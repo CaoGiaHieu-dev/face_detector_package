@@ -91,18 +91,20 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
                                             duration:
                                                 Duration(milliseconds: i * 30),
                                             child: Image.asset(
-                                              widget.pathAssetImage(
-                                                  'vector_blue'),
-                                            ),
+                                                widget.pathAssetImage(
+                                                    'vector_blue'),
+                                                package:
+                                                    'face_detector_package'),
                                           ),
                                           AnimatedContainer(
                                             height: onRunOneStep(i) ? 0 : 30,
                                             duration:
                                                 Duration(milliseconds: i * 30),
                                             child: Image.asset(
-                                              widget.pathAssetImage(
-                                                  'vector_white'),
-                                            ),
+                                                widget.pathAssetImage(
+                                                    'vector_white'),
+                                                package:
+                                                    'face_detector_package'),
                                           ),
                                         ],
                                       );

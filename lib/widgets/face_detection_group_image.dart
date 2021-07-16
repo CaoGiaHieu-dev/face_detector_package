@@ -26,11 +26,11 @@ class FaceDetectionGroupImage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Image.asset(
-            assetType == AssetType.Image
-                ? pathAssetImage(imageName)
-                : pathAssetGif(imageName),
-            height: MediaQuery.of(context).size.height / 10,
-          ),
+              assetType == AssetType.Image
+                  ? pathAssetImage(imageName)
+                  : pathAssetGif(imageName),
+              height: MediaQuery.of(context).size.height / 10,
+              package: 'face_detector_package'),
           dimesHeight,
           Text(
             title,
