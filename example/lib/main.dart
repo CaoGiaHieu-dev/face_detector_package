@@ -13,6 +13,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final config = FaceDetectorConfig.init(
     cameraType: CameraType.FRONT,
+    detectionDisplay: DetectionDisplay.RANDOM,
     listDetectorType: const <DetectionType>[
       DetectionType.LOOK_LEFT,
       DetectionType.LOOK_RIGHT,
@@ -34,9 +35,11 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: FaceDetectorView(
-          config: config,
-          size: 300,
+        body: Center(
+          child: FaceDetectorView(
+            config: config,
+            size: 300,
+          ),
         ),
       ),
     );
