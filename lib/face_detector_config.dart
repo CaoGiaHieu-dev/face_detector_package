@@ -1,19 +1,25 @@
 part of 'face_detector_package.dart';
 
 class FaceDetectorConfig {
+  /// if [DetectionDisplay] is default , it's will displayed in the order of the [listDetectorType]
+  ///
+  /// if [DetectionDisplay] is random , it's will displayed randomly in [listDetectorType]
+  ///
+  /// [listDetectorType] is list of [DetectionType] that's you want to use
+  ///
+  /// [doingStep] will take [int] step in your list live acction
   FaceDetectorConfig.init({
     required CameraType cameraType,
     required List<DetectionType> listDetectorType,
+    int doingStep = 5,
     DetectionDisplay detectionDisplay = DetectionDisplay.DEFAULT,
     bool isEnableAudio = false,
     ResolutionPreset resolutionPreset = ResolutionPreset.low,
   })  : _cameraType = cameraType,
         _isEnableAudio = isEnableAudio,
         _resolutionPreset = resolutionPreset,
-        listDetectorType = (detectionDisplay == DetectionDisplay.DEFAULT)
-            ? listDetectorType
-            : listDetectorType.toList()
-          ..shuffle(),
+        _doingStep = doingStep,
+        listDetectorType = listDetectorType,
         assert(
             listDetectorType
                 .where(
@@ -24,25 +30,34 @@ class FaceDetectorConfig {
                 .isNotEmpty,
             'Must have DetectionType.SMILE or  DetectionType.EYES_BLINK'),
         assert(listDetectorType.length >= 2,
-            'Dectector list must be more than 1 and less than 6 option');
+            'Dectector list must be more than 1 and less than 6 option') {
+    if (detectionDisplay == DetectionDisplay.RANDOM) {
+      listDetectorType.shuffle();
+    }
+    takeActionStep();
+  }
   static final ValueNotifier<bool> isReady = ValueNotifier<bool>(false);
   static List<CameraDescription> _cameras = <CameraDescription>[];
   static CameraController? cameraController;
   static late FaceDetector _faceDetector;
 
-  final List<DetectionType> listDetectorType;
+  List<DetectionType> listDetectorType;
   final CameraType _cameraType;
   final bool _isEnableAudio;
   final ResolutionPreset _resolutionPreset;
+  final int _doingStep;
 
   late ValueNotifier<DetectionType> step;
   static late ValueNotifier<int> currentStep;
 
   bool _isBusy = false;
 
+  /// This will be stream camera image when once live action is success
   static StreamController<CameraImage> listenOnDataProcess =
-      StreamController<CameraImage>();
-  static StreamController<bool> isFinish = StreamController<bool>();
+      StreamController<CameraImage>.broadcast();
+
+  /// This will be notification when you allready done all step
+  static StreamController<bool> isFinish = StreamController<bool>.broadcast();
 
   Future<void> initFaceDetector() async {
     _cameras = await availableCameras();
@@ -68,6 +83,37 @@ class FaceDetectorConfig {
     );
   }
 
+  /// this method called when you done
+  /// it's close stream listen so you can't resume listen on next time
+  /// call this method when you already done
+  static void disposeListen() {
+    listenOnDataProcess.close();
+    isFinish.close();
+  }
+
+  /// this method called when you finished listen on task
+  /// it's doesn't close stream listen so you can resume listen on next time
+  static void cleanListen() {
+    isFinish.done;
+    listenOnDataProcess.done;
+  }
+
+  void takeActionStep() {
+    var _list = listDetectorType.take(_doingStep).toList();
+    if (_list
+        .where((element) =>
+            element == DetectionType.EYES_BLINK ||
+            element == DetectionType.SMILE)
+        .isEmpty) {
+      var listImportant = [DetectionType.EYES_BLINK, DetectionType.SMILE];
+      listImportant.shuffle();
+      var i = Random().nextInt(_list.length);
+      _list.removeAt(i);
+      _list.add(listImportant.first);
+    }
+    listDetectorType = _list;
+  }
+
   Future<void> startLiveFeed() async {
     step = ValueNotifier(listDetectorType.first);
     currentStep = ValueNotifier(0);
@@ -88,10 +134,10 @@ class FaceDetectorConfig {
     await cameraController?.dispose();
     cameraController = null;
     isReady.value = false;
-    listenOnDataProcess.close();
     rollback();
   }
 
+  /// this method will be reset your step
   static void rollback() {
     currentStep.value = 0;
   }
