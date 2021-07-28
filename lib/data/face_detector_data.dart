@@ -14,7 +14,10 @@ enum DetectionDisplay {
   DEFAULT,
   RANDOM,
 }
-
+enum DetectionLastStep {
+  NONE,
+  TAKE_PORTRAITS,
+}
 enum AssetType {
   Image,
   GIF,

@@ -3,7 +3,8 @@ part of '../face_detector_package.dart';
 class FaceDetectorView extends StatefulWidget {
   const FaceDetectorView({
     Key? key,
-    this.size = 50.0,
+    this.sizeWidth = 50.0,
+    this.sizeHeight = 50.0,
     required this.config,
     this.decriptionOfLookLeft,
     this.decriptionOfLookRight,
@@ -12,9 +13,12 @@ class FaceDetectorView extends StatefulWidget {
     this.decriptionOfLookStraigh,
     this.decriptionOfConpeleted,
     required this.overlayColor,
+    this.decriptionOfTakePortraits,
   }) : super(key: key);
 
-  final double size;
+  /// using full widge of device
+  final double sizeWidth;
+  final double sizeHeight;
   final FaceDetectorConfig config;
   final Color overlayColor;
   final String? decriptionOfLookLeft;
@@ -23,6 +27,7 @@ class FaceDetectorView extends StatefulWidget {
   final String? decriptionOfSmile;
   final String? decriptionOfLookStraigh;
   final String? decriptionOfConpeleted;
+  final String? decriptionOfTakePortraits;
 
   String pathAssetImage(String name) => 'assets/images/detection/$name.png';
   @override
@@ -58,6 +63,7 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(
@@ -67,73 +73,75 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(1),
-                child: SizedBox.fromSize(
-                  child: ValueListenableBuilder<bool>(
-                      valueListenable: FaceDetectorConfig.isReady,
-                      builder: (context, snapshot, _) {
-                        return snapshot
-                            ? CameraPreview(
-                                FaceDetectorConfig.cameraController!)
-                            : const Center(
-                                child: CircularProgressIndicator(
-                                  valueColor:
-                                      AlwaysStoppedAnimation(Colors.white),
-                                ),
-                              );
-                      }),
-                ),
+                child: ValueListenableBuilder<bool>(
+                    valueListenable: FaceDetectorConfig.isReady,
+                    builder: (context, snapshot, _) {
+                      return snapshot
+                          ? CameraPreview(FaceDetectorConfig.cameraController!)
+                          : const Center(
+                              child: CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation(Colors.white),
+                              ),
+                            );
+                    }),
               ),
               CameraOverlay(
                 colors: widget.overlayColor,
-                rangeSize: widget.size,
+                width: widget.sizeWidth,
+                height: widget.sizeHeight,
               ),
-              RotationTransition(
-                turns: const AlwaysStoppedAnimation(230 / 360),
-                child: SizedBox.fromSize(
-                  size: Size.square(widget.size - 165),
-                  child: Stack(
-                    children: List.generate(60, (i) {
-                      return Positioned.fill(
-                        left: widget.size * 0.28,
-                        top: widget.size * 0.28,
-                        child: Transform(
-                          transform: Matrix4.rotationZ(6.0 * i * 0.0174533),
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: Transform.rotate(
-                              angle: 40.0,
-                              child: ValueListenableBuilder(
-                                  valueListenable:
-                                      FaceDetectorConfig.currentStep,
-                                  builder: (context, snapshot, _) {
-                                    return Stack(
-                                      children: <Widget>[
-                                        AnimatedContainer(
-                                          height: onRunOneStep(i) ? 30 : 0,
-                                          duration:
-                                              Duration(milliseconds: i * 30),
-                                          child: Image.asset(
-                                            widget
-                                                .pathAssetImage('vector_blue'),
+              Positioned(
+                top: widget.sizeHeight / 4.1,
+                child: RotationTransition(
+                  turns: const AlwaysStoppedAnimation(240 / 360),
+                  child: SizedBox.fromSize(
+                    size:
+                        Size(widget.sizeWidth * 0.84, widget.sizeHeight * 0.44),
+                    child: Stack(
+                      children: List.generate(60, (i) {
+                        return Positioned.fill(
+                          left: widget.sizeWidth * 0.46,
+                          top: widget.sizeHeight * 0.24,
+                          child: Transform(
+                            transform: Matrix4.rotationZ(6.0 * i * 0.0174533),
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: Transform.rotate(
+                                angle: 39.85,
+                                child: ValueListenableBuilder(
+                                    valueListenable:
+                                        FaceDetectorConfig.currentStep,
+                                    builder: (context, snapshot, _) {
+                                      return Stack(
+                                        children: <Widget>[
+                                          AnimatedContainer(
+                                            height: onRunOneStep(i) ? 30 : 0,
+                                            duration:
+                                                Duration(milliseconds: i * 30),
+                                            child: Image.asset(
+                                              widget.pathAssetImage(
+                                                  'vector_blue'),
+                                            ),
                                           ),
-                                        ),
-                                        AnimatedContainer(
-                                          height: onRunOneStep(i) ? 0 : 30,
-                                          duration:
-                                              Duration(milliseconds: i * 30),
-                                          child: Image.asset(
-                                            widget
-                                                .pathAssetImage('vector_white'),
+                                          AnimatedContainer(
+                                            height: onRunOneStep(i) ? 0 : 30,
+                                            duration:
+                                                Duration(milliseconds: i * 30),
+                                            child: Image.asset(
+                                              widget.pathAssetImage(
+                                                  'vector_white'),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    );
-                                  }),
+                                        ],
+                                      );
+                                    }),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                    ),
                   ),
                 ),
               ),
@@ -142,16 +150,60 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
         ),
         Expanded(
           flex: 5,
-          child: _FaceDetectorDetail(
-            step: faceDetectorConfig.step,
-            decriptionOfLookLeft: widget.decriptionOfLookLeft,
-            decriptionOfLookRight: widget.decriptionOfLookRight,
-            decriptionOfEyesBlink: widget.decriptionOfEyesBlink,
-            decriptionOfSmile: widget.decriptionOfSmile,
-            decriptionOfLookStraigh: widget.decriptionOfLookStraigh,
-            decriptionOfConpeleted: widget.decriptionOfConpeleted,
+          child: StreamBuilder<bool>(
+            stream: FaceDetectorConfig.onLastStep.stream,
+            builder: (context, AsyncSnapshot<bool> snapshot) {
+              return AnimatedSwitcher(
+                duration: const Duration(seconds: 1),
+                child: snapshot.data ?? false
+                    ? Column(
+                        children: [
+                          Text(
+                            widget.decriptionOfTakePortraits ??
+                                'Take Portraits',
+                            style:
+                                Theme.of(context).textTheme.bodyText1?.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                          ),
+                          const SizedBox(height: 40),
+                          Container(
+                            height: MediaQuery.of(context).size.height / 10,
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3),
+                            ),
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: () {
+                                faceDetectorConfig.takePortraitsImage();
+                              },
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : _FaceDetectorDetail(
+                        step: faceDetectorConfig.step,
+                        decriptionOfLookLeft: widget.decriptionOfLookLeft,
+                        decriptionOfLookRight: widget.decriptionOfLookRight,
+                        decriptionOfEyesBlink: widget.decriptionOfEyesBlink,
+                        decriptionOfSmile: widget.decriptionOfSmile,
+                        decriptionOfLookStraigh: widget.decriptionOfLookStraigh,
+                        decriptionOfConpeleted: widget.decriptionOfConpeleted,
+                      ),
+              );
+            },
           ),
-        )
+        ),
       ],
     );
   }
